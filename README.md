@@ -96,15 +96,17 @@ The current submission focuses on the core portal flow first. The following area
 
 ## Local Setup
 
-1. Create env file
+1. Install dependencies
+
+```bash
+npm install
+```
+
+2. Prepare environment and database
 
 ```bash
 cp .env.example .env
-```
-
-2. Initialize database
-
-```bash
+rm -f prisma/dev.db
 sqlite3 prisma/dev.db < prisma/init.sql
 ```
 
@@ -114,11 +116,23 @@ sqlite3 prisma/dev.db < prisma/init.sql
 npm run dev
 ```
 
+Open the app at:
+
+```text
+http://localhost:3000
+```
+
 4. Or start production build locally
 
 ```bash
 npm run build
 npm run start -- --port 3002
+```
+
+Production preview URL:
+
+```text
+http://localhost:3002
 ```
 
 ## Report Exports
