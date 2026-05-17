@@ -1,36 +1,188 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# AtomQuest Goals Portal
 
-## Getting Started
+Hackathon submission for **AtomQuest Hackathon 1.0**  
+Problem statement: **In-House Goal Setting & Tracking Portal**
 
-First, run the development server:
+This project delivers a browser-based portal for goal creation, approval, quarterly check-ins, reporting, and governance across three roles:
+
+- `Employee`
+- `Manager (L1)`
+- `Admin / HR`
+
+## What This Portal Covers
+
+### Must-have flow implemented
+
+- Employee goal creation and draft submission
+- Goal fields:
+  - Thrust Area
+  - Goal Title
+  - Goal Description
+  - Unit of Measurement
+  - Target
+  - Weightage
+- Validation rules:
+  - total weightage must equal `100%`
+  - minimum per-goal weightage must be `10%`
+  - maximum goals per employee is `8`
+- Manager review workflow:
+  - review submitted goals
+  - inline edit target and weightage
+  - approve or return for rework
+- Locked goals after approval
+- Quarterly check-ins:
+  - planned vs actual achievement
+  - status tracking
+  - employee comments
+  - manager comments
+- Progress calculation by UoM type
+- Real-time completion dashboard
+- Achievement report export:
+  - `CSV`
+  - `Excel-compatible`
+- Governance:
+  - goal unlock flow
+  - audit history
+- Analytics:
+  - quarter-on-quarter trends
+  - completion heatmap
+  - thrust-area distribution
+  - UoM mix
+  - manager effectiveness
+
+### Included for demo UX
+
+- Portal-style login page with role-based sign-in
+- Demo SSO entry buttons for Google and Microsoft ID
+- Role-specific seeded user journeys
+- Search across goals and portal records
+- Bug report dialog
+
+## Bonus / Demo-only areas
+
+These are represented in the portal UX, but not fully integrated with live enterprise services:
+
+- Google sign-in is demo-only
+- Microsoft ID sign-in is demo-only
+- Microsoft Entra / Azure AD org sync is not implemented
+- Email notifications are not wired to a live mail service
+- Microsoft Teams integration is not wired to a live Teams bot or adaptive cards
+- Rule-based escalations are not fully automated as a timed backend service
+- Bug reporting is not yet routed to a live email inbox or ticket system
+
+## Tech Stack
+
+- `Next.js 16` App Router
+- `React 19`
+- `TypeScript`
+- `Prisma`
+- `SQLite`
+- `Tailwind CSS v4`
+- Server Actions for workflow mutations
+
+## Demo Credentials
+
+### Standard login
+
+- `Employee`: `AQE1001` / `employee123`
+- `Manager`: `AQM2001` / `manager123`
+- `Admin`: `AQA3001` / `admin123`
+
+### Seeded portal users
+
+- Employee user id: `emp-aarav`
+- Manager user id: `mgr-meera`
+- Admin user id: `admin-kabir`
+
+## Local Setup
+
+1. Create env file
+
+```bash
+cp .env.example .env
+```
+
+2. Initialize database
+
+```bash
+sqlite3 prisma/dev.db < prisma/init.sql
+```
+
+3. Start development server
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+4. Or start production build locally
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+npm run build
+npm run start -- --port 3002
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Report Exports
 
-## Learn More
+- CSV: `/reports/achievement.csv`
+- Excel-compatible: `/reports/achievement.xls`
 
-To learn more about Next.js, take a look at the following resources:
+Employee-specific CSV export is also available from the employee flow.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Architecture
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```mermaid
+flowchart TD
+    U["Employee / Manager / Admin"] --> N["Next.js 16 Portal UI"]
+    N --> A["Server Actions"]
+    A --> P["Prisma ORM"]
+    P --> D["SQLite Database"]
 
-## Deploy on Vercel
+    N --> R["CSV / XLS Report Routes"]
+    A --> G["Goal Workflow Logic"]
+    A --> C["Check-in Logic"]
+    A --> AU["Audit Logging"]
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+    G --> D
+    C --> D
+    AU --> D
+    R --> D
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Key Data Model
+
+- `User`
+- `Goal`
+- `CheckIn`
+- `AuditLog`
+
+Important enums:
+
+- `Role`
+- `UomType`
+- `MetricDirection`
+- `GoalWorkflowStatus`
+- `Quarter`
+- `CheckInStatus`
+
+## Submission Note
+
+This repository is optimized for a strong hackathon MVP:
+
+- end-to-end role journeys are available
+- must-have BRD workflow is covered
+- bonus integrations are represented at demo level where full enterprise setup would take additional time
+
+## Deployment
+
+Recommended platform:
+
+- `Vercel` for the web app
+
+After pushing to GitHub:
+
+1. Import the repo into Vercel
+2. Set environment variable:
+   - `DATABASE_URL=file:./prisma/dev.db`
+3. Run a deploy
+
+For production-grade deployment, SQLite should eventually be replaced with a hosted database.

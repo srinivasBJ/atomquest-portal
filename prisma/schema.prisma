@@ -1,0 +1,122 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  EMPLOYEE
+  MANAGER
+  ADMIN
+}
+
+enum UomType {
+  NUMERIC
+  PERCENT
+  TIMELINE
+  ZERO_BASED
+}
+
+enum MetricDirection {
+  HIGHER_IS_BETTER
+  LOWER_IS_BETTER
+  DATE_BASED
+  ZERO_IS_SUCCESS
+}
+
+enum GoalWorkflowStatus {
+  DRAFT
+  SUBMITTED
+  REWORK
+  APPROVED
+}
+
+enum Quarter {
+  Q1
+  Q2
+  Q3
+  Q4
+}
+
+enum CheckInStatus {
+  NOT_STARTED
+  ON_TRACK
+  COMPLETED
+}
+
+model User {
+  id         String     @id
+  name       String
+  email      String     @unique
+  role       Role
+  department String
+  title      String
+  managerId  String?
+  manager    User?      @relation("ManagerReports", fields: [managerId], references: [id])
+  reports    User[]     @relation("ManagerReports")
+  goals      Goal[]
+  checkIns   CheckIn[]  @relation("CheckInEmployee")
+  reviews    CheckIn[]  @relation("CheckInManager")
+  auditLogs  AuditLog[] @relation("AuditActor")
+}
+
+model Goal {
+  id                   String             @id @default(cuid())
+  title                String
+  description          String
+  thrustArea           String
+  uomType              UomType
+  metricDirection      MetricDirection
+  targetValue          String
+  weightage            Int
+  workflowStatus       GoalWorkflowStatus @default(DRAFT)
+  isShared             Boolean            @default(false)
+  sharedGroupKey       String?
+  sharedReadOnlyFields Boolean            @default(false)
+  employeeId           String
+  employee             User               @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  checkIns             CheckIn[]
+  auditLogs            AuditLog[]
+  lockedAt             DateTime?
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+
+  @@index([employeeId, workflowStatus])
+}
+
+model CheckIn {
+  id                String        @id @default(cuid())
+  quarter           Quarter
+  status            CheckInStatus
+  actualValue       String
+  employeeComment   String?
+  managerComment    String?
+  goalId            String
+  goal              Goal          @relation(fields: [goalId], references: [id], onDelete: Cascade)
+  employeeId        String
+  employee          User          @relation("CheckInEmployee", fields: [employeeId], references: [id], onDelete: Cascade)
+  reviewedById      String?
+  reviewedBy        User?         @relation("CheckInManager", fields: [reviewedById], references: [id], onDelete: SetNull)
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+
+  @@unique([goalId, quarter])
+}
+
+model AuditLog {
+  id          String   @id @default(cuid())
+  goalId       String
+  goal         Goal     @relation(fields: [goalId], references: [id], onDelete: Cascade)
+  actorId      String
+  actor        User     @relation("AuditActor", fields: [actorId], references: [id], onDelete: Cascade)
+  action       String
+  fieldName    String?
+  previousValue String?
+  newValue     String?
+  createdAt    DateTime @default(now())
+
+  @@index([goalId, createdAt])
+}
