@@ -58,17 +58,17 @@ This project delivers a browser-based portal for goal creation, approval, quarte
 - Search across goals and portal records
 - Bug report dialog
 
-## Bonus / Demo-only areas
+## Optional / Future Enhancements
 
-These are represented in the portal UX, but not fully integrated with live enterprise services:
+The current submission focuses on the core portal flow first. The following areas can be extended further in future iterations:
 
-- Google sign-in is demo-only
-- Microsoft ID sign-in is demo-only
-- Microsoft Entra / Azure AD org sync is not implemented
-- Email notifications are not wired to a live mail service
-- Microsoft Teams integration is not wired to a live Teams bot or adaptive cards
-- Rule-based escalations are not fully automated as a timed backend service
-- Bug reporting is not yet routed to a live email inbox or ticket system
+- Google sign-in
+- Microsoft ID sign-in
+- Microsoft Entra / Azure AD org sync
+- Email notifications
+- Microsoft Teams integration
+- Rule-based escalations
+- Bug reporting workflow with inbox or ticket routing
 
 ## Tech Stack
 
@@ -170,7 +170,7 @@ This repository is optimized for a strong hackathon MVP:
 
 - end-to-end role journeys are available
 - must-have BRD workflow is covered
-- bonus integrations are represented at demo level where full enterprise setup would take additional time
+- optional enterprise integrations can be extended further if needed
 
 ## Deployment
 
