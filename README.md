@@ -196,7 +196,7 @@ After pushing to GitHub:
 
 1. Import the repo into Vercel
 2. Set environment variable:
-   - `DATABASE_URL=file:./prisma/dev.db`
+   - `DATABASE_URL=file:./dev.db`
 3. Run a deploy
 
 For production-grade deployment, SQLite should eventually be replaced with a hosted database.
