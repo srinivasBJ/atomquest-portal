@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { reportBugAction } from "@/app/actions";
 import { BugIcon } from "@/components/topbar-icons";
 
@@ -13,20 +14,36 @@ export function BugReportDialog({
 }) {
   const [open, setOpen] = useState(false);
 
-  return (
-    <>
-      <button
-        type="button"
-        onClick={() => setOpen(true)}
-        className="flex h-11 w-11 items-center justify-center rounded-2xl border border-[#ffb199] bg-[#ff7448] text-white shadow-[0_8px_18px_rgba(255,116,72,0.22)]"
-        aria-label="Report bug"
-      >
-        <BugIcon className="h-5 w-5" />
-      </button>
+  useEffect(() => {
+    if (!open) {
+      return;
+    }
 
-      {open ? (
-        <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/55 p-6 backdrop-blur-[2px]">
-          <form action={reportBugAction} className="mt-12 w-full max-w-3xl rounded-[30px] border border-[#e6eaf3] bg-white p-6 text-slate-900 shadow-[0_30px_80px_rgba(0,0,0,0.25)]">
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        setOpen(false);
+      }
+    }
+
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [open]);
+
+  const dialog = open && typeof document !== "undefined"
+    ? createPortal(
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/55 px-4 py-6 backdrop-blur-[2px]">
+          <div className="absolute inset-0" aria-hidden="true" onClick={() => setOpen(false)} />
+          <form
+            action={reportBugAction}
+            className="relative z-10 max-h-[calc(100vh-48px)] w-full max-w-3xl overflow-y-auto rounded-[30px] border border-[#e6eaf3] bg-white p-6 text-slate-900 shadow-[0_30px_80px_rgba(0,0,0,0.25)]"
+          >
             <input type="hidden" name="selectedUserId" value={userId} />
             <input type="hidden" name="selectedView" value={selectedView} />
             <div className="flex items-start justify-between gap-4">
@@ -42,7 +59,7 @@ export function BugReportDialog({
               <button
                 type="button"
                 onClick={() => setOpen(false)}
-                className="flex h-11 w-11 items-center justify-center rounded-full border border-[#e7ebf3] bg-[#f8faff] text-2xl text-slate-500"
+                className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-[#e7ebf3] bg-[#f8faff] text-2xl text-slate-500"
                 aria-label="Close bug report"
               >
                 ×
@@ -133,8 +150,23 @@ export function BugReportDialog({
               </button>
             </div>
           </form>
-        </div>
-      ) : null}
+        </div>,
+        document.body,
+      )
+    : null;
+
+  return (
+    <>
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        className="flex h-11 w-11 items-center justify-center rounded-2xl border border-[#ffb199] bg-[#ff7448] text-white shadow-[0_8px_18px_rgba(255,116,72,0.22)]"
+        aria-label="Report bug"
+      >
+        <BugIcon className="h-5 w-5" />
+      </button>
+
+      {dialog}
     </>
   );
 }
